@@ -1,25 +1,38 @@
 window.DoomLoader = {
   async start({ canvas, iwadName, iwadBytes, onStatus }) {
     onStatus?.(`Received IWAD ${iwadName} (${iwadBytes.length} bytes).`);
-    onStatus?.('This is a bootstrap stub. Replace web/doom-loader.js with the Emscripten-generated loader or make it call into your compiled Doom runtime.');
 
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (typeof window.DoomModuleFactory !== 'function') {
+      throw new Error('doom.js / DoomModuleFactory not found. Run web/build-wasm.sh first to generate web/dist/doom.js and doom.wasm.');
+    }
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 36px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('DOOM ENGINE PLACEHOLDER', canvas.width / 2, canvas.height / 2 - 10);
+    const module = await window.DoomModuleFactory({
+      canvas,
+      print: (text) => onStatus?.(String(text)),
+      printErr: (text) => onStatus?.(`[stderr] ${text}`),
+      locateFile: (path) => `./dist/${path}`,
+      preRun: [function () {
+        try {
+          if (!module.FS.analyzePath('/doom1.wad').exists) {
+            module.FS.writeFile(`/${iwadName}`, iwadBytes);
+          } else {
+            module.FS.unlink('/doom1.wad');
+            module.FS.writeFile(`/${iwadName}`, iwadBytes);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }],
+    });
 
-    ctx.font = '18px Arial';
-    ctx.fillStyle = '#ffcf7a';
-    ctx.fillText('Compile the C source to WebAssembly and mount the IWAD in MEMFS.', canvas.width / 2, canvas.height / 2 + 28);
+    onStatus?.('Starting Doom main()...');
+    module.callMain(['-iwad', `/${iwadName}`]);
 
     return {
       stop() {
-        onStatus?.('Engine stopped.');
+        onStatus?.('Stopping Doom runtime is not implemented yet; reload the page to reset the module.');
       },
+      module,
     };
   },
 };
