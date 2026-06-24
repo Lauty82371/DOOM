@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DOOM HTML</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>DOOM HTML</h1>
+      <p class="subtitle">Canvas launcher for the Doom engine with local IWAD upload.</p>
+
+      <section class="panel">
+        <h2>1. Select an IWAD</h2>
+        <p>Pick a local <code>.wad</code> file before starting. The file is stored in your browser for this session only.</p>
+        <label class="file-picker">
+          <input id="iwadInput" type="file" accept=".wad,.WAD,application/octet-stream" />
+          <span>Choose IWAD</span>
+        </label>
+        <div id="wadStatus" class="status">No IWAD selected.</div>
+      </section>
+
+      <section class="panel">
+        <h2>2. Start engine</h2>
+        <button id="startBtn" disabled>Start Doom</button>
+        <button id="fullscreenBtn" disabled>Fullscreen</button>
+        <p class="hint">The engine bootstrap is prepared here. Hook your Emscripten build output into <code>doom-loader.js</code>.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Controls</h2>
+        <ul>
+          <li>Arrow keys / WASD – move</li>
+          <li>Ctrl / mouse – fire</li>
+          <li>Space – use</li>
+          <li>Shift – run</li>
+        </ul>
+      </section>
+
+      <section class="panel small">
+        <h2>Log</h2>
+        <pre id="log"></pre>
+      </section>
+    </aside>
+
+    <main class="viewport-wrap">
+      <div class="viewport-header">Canvas Output</div>
+      <canvas id="doomCanvas" width="960" height="600"></canvas>
+      <div id="overlay" class="overlay">
+        <div>
+          <strong>Waiting for IWAD</strong>
+          <p>Select a Doom IWAD, then press Start Doom.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
